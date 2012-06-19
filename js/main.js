@@ -61,16 +61,31 @@ var AppRouter = Backbone.Router.extend({
     },
 
     changePage:function (page) {
+        var options = {
+            changeHash: false,
+        };
+        
         $(page.el).attr('data-role', 'page');
         page.render();
         $('body').append($(page.el));
-        var transition = $.mobile.defaultPageTransition;
+        
         // We don't want to slide the first page
         if (this.firstPage) {
-            transition = 'none';
+            options.transition = 'none';
             this.firstPage = false;
         }
-        $.mobile.changePage($(page.el), {changeHash:false, transition: transition});
+        
+        // Find the anchor that triggered this page change and mix-in the relevant data attributes
+        else if (this.clickedAnchor) {
+            _.extend({
+                reverse: (this.clickedAnchor.data().direction === 'reverse'),
+    			transition: this.clickedAnchor.data().transition
+            }, options);
+            
+            this.clickedAnchor = null;
+        }
+        
+        $.mobile.changePage($(page.el), options);
     }
 
 });
@@ -78,5 +93,11 @@ var AppRouter = Backbone.Router.extend({
 $(document).ready(function () {
     console.log('document ready');
     app = new AppRouter();
+    
+    // Bind to click events so we can store the anchor that triggered the page change.
+    $(document).bind("click", function(event) {
+    	app.clickedAnchor = $(event.target).closest('a');
+	});
+    
     Backbone.history.start();
 });
