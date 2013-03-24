@@ -38,7 +38,7 @@ var AppRouter = Backbone.Router.extend({
 
     initialize:function () {
         // Handle back button throughout the application
-        $('.back').live('click', function(event) {
+        $('.back').on('click', function(event) {
             window.history.back();
             return false;
         });
